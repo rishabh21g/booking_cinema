@@ -30,14 +30,14 @@ func sessionkey(id string) string {
 }
 
 // booking a new seat
-func (s *RedisStore) Book(b Booking) (Booking, error) {
+func (s *RedisStore) Book(b Booking) error {
 	session, err := s.hold(b)
 
 	if err != nil {
-		return Booking{}, ErrSeatsAlreadyBooked
+		return err
 	}
 	log.Printf("Session Booked: %v", session)
-	return session, nil
+	return nil
 
 }
 
@@ -141,4 +141,26 @@ func (s *RedisStore) Release(ctx context.Context, sessioID string, userID string
 	}
 	s.rdb.Del(ctx, sk, sessionkey(sessioID))
 	return nil
+}
+
+func (s *RedisStore) ListBookings(movieID string) []Booking {
+	pattern := fmt.Sprintf("seat:%s:*", movieID)
+	var sessions []Booking
+
+	ctx := context.Background()
+
+	iter := s.rdb.Scan(ctx, 0, pattern, 0).Iterator()
+	for iter.Next(ctx) {
+		val, err := s.rdb.Get(ctx, iter.Val()).Result()
+		if err != nil {
+			continue
+		}
+		session, err := parseSession(val)
+		if err != nil {
+			continue
+		}
+		sessions = append(sessions, session)
+	}
+
+	return sessions
 }

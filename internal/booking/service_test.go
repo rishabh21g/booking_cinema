@@ -6,13 +6,14 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/rishabh21g/booking_cinema/internal/adapter/redis"
 )
 
 func TestConcurrentBokking(t *testing.T) {
 	// creating a in memory store
-	store := NewConcurrentMemoryStore() // lock safe memory
+	// store := NewConcurrentMemoryStore() // lock safe memory
 	// store := NewMemoryStrore()  not safe memory
-
+	store := NewRedisStore(redis.NewRedisClient("localhost:6379"))
 	// creating a service
 	service_store := NewService(store)
 
@@ -34,7 +35,7 @@ func TestConcurrentBokking(t *testing.T) {
 			defer wg.Done()
 
 			// booking on described seat
-			err := service_store.Book(Booking{
+			_, err := service_store.Book(Booking{
 				MoviedID: "screen-1",
 				SeatID:   "C2",
 				UserID:   uuid.New().String(),
