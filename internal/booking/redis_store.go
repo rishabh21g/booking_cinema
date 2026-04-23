@@ -30,15 +30,15 @@ func sessionkey(id string) string {
 }
 
 // booking a new seat
-func (s *RedisStore) Book(b Booking) error {
+func (s *RedisStore) Book(b Booking) (Booking, error) {
 	session, err := s.hold(b)
-
 	if err != nil {
-		return err
+		return Booking{}, err
 	}
-	log.Printf("Session Booked: %v", session)
-	return nil
 
+	log.Printf("Session booked %v", session)
+
+	return session, nil
 }
 
 // holding a seat for a time defined in ttl
