@@ -10,7 +10,8 @@ import (
 
 func TestConcurrentBokking(t *testing.T) {
 	// creating a in memory store
-	store := NewMemoryStrore()
+	store := NewConcurrentMemoryStore() // lock safe memory
+	// store := NewMemoryStrore()  not safe memory
 
 	// creating a service
 	service_store := NewService(store)
