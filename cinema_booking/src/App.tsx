@@ -1,122 +1,145 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect, useCallback } from 'react';
+import './App.css';
+import type { Movie, SeatStatus, Session } from './types/types';
+import { Header } from './components/Header';
+import MovieList from './components/Movies';
+import { Checkout } from './components/CheckOut';
+import SeatGrid from './components/Seat';
+
+// --- API Helper ---
+async function api<T>(method: string, path: string, body?: unknown): Promise<T | null> {
+  const opts: RequestInit = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (body) {
+    opts.body = JSON.stringify(body);
+  }
+  const response = await fetch(path, opts);
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Request failed');
+  }
+  return data;
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [userID] = useState(() => crypto.randomUUID().replace(/-/g, '').slice(0, 12));
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [seatStatuses, setSeatStatuses] = useState<Record<string, SeatStatus>>({});
+  const [activeSession, setActiveSession] = useState<Session | null>(null);
+  const [checkoutStatus, setCheckoutStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // --- Effects ---
+  useEffect(() => {
+    api<Movie[]>('GET', '/movies').then(data => setMovies(data || []));
+  }, []);
+
+  const fetchSeats = useCallback(() => {
+    if (!selectedMovie) return;
+    api<SeatStatus[]>('GET', `/movies/${selectedMovie.id}/seats`).then(seats => {
+      const statusMap = (seats || []).reduce((acc, s) => {
+        acc[s.seat_id] = s;
+        return acc;
+      }, {} as Record<string, SeatStatus>);
+      setSeatStatuses(statusMap);
+    });
+  }, [selectedMovie]);
+
+  useEffect(() => {
+    if (!selectedMovie) return;
+    fetchSeats();
+    const pollInterval = setInterval(fetchSeats, 2000);
+    return () => clearInterval(pollInterval);
+  }, [selectedMovie, fetchSeats]);
+
+  // --- Handlers ---
+  const handleSelectMovie = (movie: Movie) => {
+    if (activeSession) {
+      api('DELETE', `/sessions/${activeSession.session_id}`, { user_id: userID }).catch(() => {});
+    }
+    setActiveSession(null);
+    setSelectedMovie(movie);
+  };
+
+  const handleHoldSeat = async (seatID: string) => {
+    if (activeSession) return;
+    try {
+      const session = await api<Session>('POST', `/movies/${selectedMovie!.id}/seats/${seatID}/hold`, { user_id: userID });
+      if (session) {
+        setActiveSession(session);
+        fetchSeats();
+      }
+    } catch (err) {
+      showTempCheckoutStatus((err as Error).message, 'error');
+    }
+  };
+
+  const handleConfirmSeat = async () => {
+    if (!activeSession) return;
+    try {
+      await api('PUT', `/sessions/${activeSession.session_id}/confirm`, { user_id: userID });
+      setActiveSession(null);
+      fetchSeats();
+      showTempCheckoutStatus('Confirmed!', 'success');
+    } catch (err) {
+      showTempCheckoutStatus((err as Error).message, 'error');
+    }
+  };
+
+  const handleReleaseSeat = async () => {
+    if (!activeSession) return;
+    try {
+      await api('DELETE', `/sessions/${activeSession.session_id}`, { user_id: userID });
+      setActiveSession(null);
+      fetchSeats();
+    } catch (err) {
+      showTempCheckoutStatus((err as Error).message, 'error');
+    }
+  };
+
+  const showTempCheckoutStatus = (message: string, type: 'success' | 'error') => {
+    setCheckoutStatus({ message, type });
+    setTimeout(() => {
+      setCheckoutStatus(null);
+    }, 3000);
+  };
+
+  const onTimerExpire = () => {
+    setActiveSession(null);
+    fetchSeats();
+    showTempCheckoutStatus('Hold expired', 'error');
+  };
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+      <Header userID={userID} />
+      <MovieList movies={movies} selectedMovie={selectedMovie} onSelectMovie={handleSelectMovie} />
+      {selectedMovie && (
+        <div className="content">
+          <SeatGrid
+            movie={selectedMovie}
+            seatStatuses={seatStatuses}
+            userID={userID}
+            onHoldSeat={handleHoldSeat}
+          />
+          <Checkout
+            session={activeSession}
+            status={checkoutStatus}
+            onConfirm={handleConfirmSeat}
+            onRelease={handleReleaseSeat}
+            onTimerExpire={onTimerExpire}
+          />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
