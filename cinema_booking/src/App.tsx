@@ -16,7 +16,7 @@ async function api<T>(method: string, path: string, body?: unknown): Promise<T |
     opts.body = JSON.stringify(body);
   }
   const response = await fetch(path, opts);
-
+  console.log(response)
   if (response.status === 204) {
     return null;
   }
@@ -35,7 +35,6 @@ function App() {
   const [seatStatuses, setSeatStatuses] = useState<Record<string, SeatStatus>>({});
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [checkoutStatus, setCheckoutStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
   // --- Effects ---
   useEffect(() => {
     api<Movie[]>('GET', '/movies').then(data => setMovies(data || []));
