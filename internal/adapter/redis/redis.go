@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/redis/go-redis/v9"
+	goredis "github.com/redis/go-redis/v9"
 )
 
-func NewRedisClient(address string) *redis.Client {
+func NewRedisClient(address string) *goredis.Client {
 
-	rdb := redis.NewClient(&redis.Options{
+	rdb := goredis.NewClient(&goredis.Options{
 		Addr: address,
 	})
 	if err := rdb.Ping(context.Background()).Err(); err != nil {

@@ -143,6 +143,7 @@ func (s *RedisStore) Release(ctx context.Context, sessioID string, userID string
 	return nil
 }
 
+// list of bookings
 func (s *RedisStore) ListBookings(movieID string) []Booking {
 	pattern := fmt.Sprintf("seat:%s:*", movieID)
 	var sessions []Booking

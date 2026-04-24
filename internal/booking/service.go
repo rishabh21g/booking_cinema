@@ -11,13 +11,7 @@ func NewService(store BookingStore) *Service {
 }
 
 func (s *Service) Book(b Booking) (Booking, error) {
-	err := s.store.Book(b)
-	if err != nil {
-		// On failure, return an empty Booking struct and the error.
-		return Booking{}, err
-	}
-	// On success, return the original Booking struct and a nil error.
-	return b, nil
+	return s.store.Book(b)
 }
 
 func (s *Service) ListBookings(movieID string) []Booking {
