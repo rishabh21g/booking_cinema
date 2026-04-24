@@ -1,18 +1,25 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* --- New "BookMyShow" Inspired Theme --- */
 :root {
-  --bg: #0f0f0f;
-  --surface: #1a1a1a;
-  --surface-hover: #252525;
-  --border: #333;
-  --text: #e0e0e0;
-  --text-muted: #888;
-  --available: #2a2a2a;
-  --available-hover: #3a3a3a;
-  --held-mine: #d4a017;
-  --held-other: #e06c00;
-  --confirmed: #c0392b;
-  --accent: #4fc3f7;
+  --bg: #1a1a1d;
+  --surface: #2c2c34;
+  --surface-hover: #3a3a42;
+  --border: #444;
+  --text: #f0f0f0;
+  --text-muted: #a0a0a0;
+  --accent: #f84464; /* BookMyShow's signature red/pink */
   --danger: #e74c3c;
-  --font: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  --success: #2ecc71;
+
+  --available: #4a4a52;
+  --available-hover: #6a6a72;
+  --held-mine: #ffc300;
+  --held-other: #ff8f00;
+  --confirmed: #c0392b;
+
+  --font: 'Roboto', sans-serif;
 }
 
 #root {
@@ -23,211 +30,220 @@
   padding: 2rem;
 }
 
+/* --- Header --- */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
 }
 
 header h1 {
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
   letter-spacing: -0.02em;
 }
 
 .user-id {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   background: var(--surface);
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 16px;
 }
 
+/* --- Movie List --- */
 .movies {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .movie-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.2rem 1.6rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1rem;
   cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
-  min-width: 180px;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
 }
 
 .movie-card:hover {
-  background: var(--surface-hover);
+  transform: translateY(-5px);
   border-color: var(--accent);
 }
 
 .movie-card.selected {
   border-color: var(--accent);
   background: var(--surface-hover);
+  box-shadow: 0 0 15px rgba(248, 68, 100, 0.3);
 }
 
 .movie-card h3 {
-  font-size: 1rem;
-  margin-bottom: 0.4rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 .movie-card p {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
+/* --- Main Content Area --- */
 .content {
   display: flex;
-  gap: 2rem;
+  gap: 2.5rem;
   align-items: flex-start;
   flex-wrap: wrap;
 }
 
 .screen-area {
-  flex: 1;
-  min-width: 300px;
+  flex: 3;
+  min-width: 400px;
 }
 
 .screen-label {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.2em;
   color: var(--text-muted);
-  margin-bottom: 0.6rem;
+  margin-bottom: 1rem;
 }
 
 .screen-bar {
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--accent),
-    transparent
-  );
-  border-radius: 2px;
-  margin: 0 2rem 1.5rem;
+  height: 5px;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  border-radius: 5px;
+  margin: 0 2rem 2rem;
+  opacity: 0.5;
 }
 
+/* --- Seat Grid --- */
 .seat-grid {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .seat-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
   align-items: center;
 }
 
 .row-label {
-  width: 1.5rem;
-  font-size: 0.7rem;
+  width: 2rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   text-align: center;
 }
 
 .seat {
-  width: 36px;
+  width: 32px;
   height: 32px;
-  border-radius: 6px 6px 3px 3px;
-  border: none;
+  border-radius: 4px;
+  border: 1px solid var(--available);
+  background: transparent;
   cursor: pointer;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-family: var(--font);
   color: var(--text-muted);
-  background: var(--available);
-  transition:
-    background 0.2s,
-    transform 0.15s;
+  transition: all 0.2s;
 }
 
-.seat:hover:not(.seat--held-mine):not(.seat--held-other):not(
-    .seat--confirmed
-  ) {
+.seat:hover:not([disabled]) {
   background: var(--available-hover);
-  transform: scale(1.08);
+  transform: scale(1.1);
+}
+
+.seat[disabled] {
+  cursor: not-allowed;
 }
 
 .seat--held-mine {
   background: var(--held-mine);
+  border-color: var(--held-mine);
   color: #000;
-  cursor: default;
 }
 
 .seat--held-other {
   background: var(--held-other);
+  border-color: var(--held-other);
   color: #fff;
-  cursor: not-allowed;
 }
 
 .seat--confirmed {
   background: var(--confirmed);
+  border-color: var(--confirmed);
   color: #fff;
-  cursor: not-allowed;
 }
 
+/* --- Legend --- */
 .legend {
   display: flex;
-  gap: 1.2rem;
+  gap: 1.5rem;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   flex-wrap: wrap;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.7rem;
+  gap: 0.5rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
 .legend-swatch {
-  width: 14px;
-  height: 12px;
-  border-radius: 3px 3px 2px 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
 }
 
+/* --- Checkout Area --- */
 .checkout {
-  width: 280px;
+  flex: 1;
+  min-width: 300px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.4rem;
+  border-radius: 12px;
+  padding: 1.5rem;
 }
 
 .checkout h3 {
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
   color: var(--accent);
+  text-align: center;
 }
 
 .checkout-info {
-  font-size: 0.8rem;
-  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .checkout-info span {
   color: var(--text-muted);
+  margin-right: 1rem;
 }
 
 .timer {
-  font-size: 1.8rem;
+  font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
-  margin: 1rem 0;
+  margin: 1.5rem 0;
   color: var(--held-mine);
   transition: color 0.3s;
 }
@@ -238,44 +254,45 @@ header h1 {
 
 .checkout-buttons {
   display: flex;
-  gap: 0.6rem;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .btn {
-  flex: 1;
-  padding: 0.6rem;
+  padding: 0.8rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-family: var(--font);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
 }
 
 .btn:hover {
-  opacity: 0.85;
+  opacity: 0.9;
+  transform: scale(1.02);
 }
 
 .btn--confirm {
-  background: #27ae60;
+  background: var(--accent);
   color: #fff;
 }
 
 .btn--release {
-  background: var(--danger);
+  background: #555;
   color: #fff;
 }
 
 .status-msg {
   text-align: center;
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 2rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .status-msg.success {
-  color: #27ae60;
+  color: var(--success);
 }
 .status-msg.error {
   color: var(--danger);
@@ -284,6 +301,6 @@ header h1 {
 .empty-state {
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.85rem;
-  padding: 3rem 1rem;
+  font-size: 0.9rem;
+  padding: 4rem 1rem;
 }
